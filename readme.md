@@ -18,10 +18,13 @@ Open the Wordpress admin, navigation to the `Plugins` tab and activate the
 `CAMRA Auth` plugin. Once active go to the `Settings > CAMRA Auth` menu and 
 fill in your branch code and API key.
 
-Create and publish two new pages - `/login` and `/members`. Edit the login page 
-and add the form tag to the body and save.
+Create and publish two new pages - `/login` and `/members`.
+
+On the login page and add the form tag to the body and save.
 
     [camra_auth_login_form]
+
+## Extras
 
 If you would like to place a link/button somewhere which says login when there
 is no logged in user, or logout when there is then use a code snippet like the 
@@ -33,4 +36,4 @@ below:
     } else {
         ?><a href="<?php echo home_url( '/members/' ); ?>">Members' Area</a> | <a href="<?php echo home_url( '/logout/' ); ?>">Logout</a><?php
     }
-    ??>
+    ?>
