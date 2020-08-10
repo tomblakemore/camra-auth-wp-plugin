@@ -11,9 +11,24 @@ if (! function_exists('array_get')) {
      */
     function array_get($array, $key, $default = null)
     {
-        if (is_array($array) && array_key_exists($key, $array)) {
-            return $array[$key];
-        } elseif (is_object($array) && property_exists($array, $key)) {
+        if (is_array($array)) {
+
+            if (array_key_exists($key, $array)) {
+                return $array[$key];
+            }
+
+            foreach (explode('.', $key) as $segment) {
+                if (array_key_exists($segment, $array)) {
+                    $array = $array[$segment];
+                } else {
+                    return $default;
+                }
+            }
+
+            return $array;
+        }
+
+        if (is_object($array) && property_exists($array, $key)) {
             return $array->{$key};
         }
 
