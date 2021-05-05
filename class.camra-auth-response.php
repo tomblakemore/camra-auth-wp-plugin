@@ -26,24 +26,6 @@ class CAMRAAuth_Response
     protected $outcome = '';
 
     /**
-     * Call on plugin activation to add the database options.
-     *
-     * @return void
-     * @static
-     */
-    public static function activate()
-    {
-        add_option('camra_auth', [
-            'branch_code' => '',
-            'key' => '',
-            'timeout' => 5,
-            'url' => 'https://api.camra.org.uk/index.php/api/branch/auth_1/format/json',
-            'ssl_trust_certs' => '',
-            'ssl_verifypeer' => false
-        ]);
-    }
-
-    /**
      * Getter for whether the outcome is authentic.
      *
      * @return bool
@@ -139,14 +121,29 @@ class CAMRAAuth_Response
                 throw new Exception($message);
             }
 
+            if (!($memno = array_get($payload, 'MembershipNumber'))) {
+                throw new Exception('Missing membership number from service response');
+            }
+
+            $fails = false;
+
             $branch_code = array_get($options, 'branch_code');
 
             if (!empty($branch_code) && $branch_code !== array_get($payload, 'Branch')) {
-                throw new Exception('Invalid branch');   
+                $fails = true;
             }
 
-            if (!($memno = array_get($payload, 'MembershipNumber'))) {
-                throw new Exception('Missing membership number from service response');
+            if ($fails) {
+
+                $extra_memnos = explode("\r\n", array_get($options, 'extra_memnos'));
+
+                if (in_array($memno, $extra_memnos)) {
+                    $fails = false;
+                }
+            }
+
+            if ($fails) {
+                throw new Exception('Invalid branch or membership number');
             }
 
             $response->memno = $memno;
@@ -158,17 +155,6 @@ class CAMRAAuth_Response
         }
 
         return $response;
-    }
-
-    /**
-     * Call on plugin deactivation to remmove the database options.
-     *
-     * @return void
-     * @static
-     */
-    public static function deactivate()
-    {
-        delete_option('camra_auth');
     }
 
     /**

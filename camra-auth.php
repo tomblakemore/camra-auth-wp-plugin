@@ -13,8 +13,26 @@ require_once(plugin_dir_path(__FILE__) . 'class.camra-auth-response.php');
 require_once(plugin_dir_path(__FILE__) . 'class.camra-auth-member.php');
 require_once(plugin_dir_path(__FILE__) . 'camra-auth-utilities.php');
 
-register_activation_hook(__FILE__, ['CAMRAAuth_Response', 'activate']);
-register_deactivation_hook(__FILE__, ['CAMRAAuth_Response', 'deactivate']);
+register_activation_hook( __FILE__, 'camra_auth_activate');
+register_deactivation_hook(__FILE__, 'camra_auth_deactivate');
+
+/**
+ * Install the plugin.
+ *
+ * @return void
+ */
+function camra_auth_activate()
+{
+    add_option('camra_auth', [
+        'branch_code' => '',
+        'extra_memnos' => '',
+        'key' => '',
+        'timeout' => 5,
+        'url' => 'https://api.camra.org.uk/index.php/api/branch/auth_1/format/json',
+        'ssl_trust_certs' => '',
+        'ssl_verifypeer' => false
+    ]);
+}
 
 /**
  * Define an options page for the admin.
@@ -24,6 +42,16 @@ register_deactivation_hook(__FILE__, ['CAMRAAuth_Response', 'deactivate']);
 function camra_auth_admin_menu()
 {
     add_options_page('CAMRA Auth Settings', 'CAMRA Auth', 'manage_options', 'camra_auth', 'camra_auth_output_admin_options');
+}
+
+/**
+ * Uninstall the plugin.
+ *
+ * @return void
+ */
+function camra_auth_deactivate()
+{
+    delete_option('camra_auth');
 }
 
 /**
@@ -163,6 +191,7 @@ function camra_auth_wp_loaded()
 
         update_option('camra_auth', [
             'branch_code' => array_get($_POST, 'camra_auth_branch_code'),
+            'extra_memnos' => array_get($_POST, 'camra_auth_extra_memnos'),
             'key' => array_get($_POST, 'camra_auth_key'),
             'timeout' => intval(array_get($_POST, 'camra_auth_timeout')),
             'url' => array_get($_POST, 'camra_auth_url'),
